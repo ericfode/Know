@@ -2,7 +2,7 @@
 
 |%  
 ++  tx0  ^-  tx  0
-++  txmax ^-  tx  0xffff.ffff.ffff.ffff
+++  txmax  ^-  tx  0xffff.ffff.ffff.ffff
 ++  new-datom
   |=  [=e =a =v =tx]
   ^-  datom
@@ -18,40 +18,6 @@
   |=  [=e =a =v]
   ^-  @p
   (mug [e a v])
-::
-++  ncmp
-  |*  [a=* b=*]
-  ?~  a  &
-  ?~  b  &
-  =(a b)
-++  cmp-datom
-  |*  [[a1=* a2=* a3=* a4=*] [b1=* b2=* b3=* b4=*]]
-  ::  TODO assert the types of each pair are the same 
-  ^-  ?
-  ?:  (ncmp a1 b1)
-    ?:  (ncmp a2 b2)
-      ?:  (ncmp a3 b3)
-        ?:  (ncmp a4 b4)
-          &
-        (dor a4 b4)
-      (dor a3 b3)
-    (dor a2 b2)
-  (dor a1 b1)
-::
-++  cmp-eavt
-  |=  [a=indexer b=indexer]
-  ^-  ?
-  (cmp-datom [e.a a.a v.a tx.a] [e.b a.b v.b tx.b])
-::
-++  cmp-aevt
-  |=  [a=indexer b=indexer]
-  ^-  ?
-  (cmp-datom [a.a e.a v.a tx.a] [a.b e.b v.b tx.b])
-::
-++  cmp-avet
-  |=  [a=indexer b=indexer]
-  ^-  ?
-  (cmp-datom [a.a v.a e.a tx.a] [a.b v.b e.b tx.b])
 ::
 ++  dtoi
   |=  =datom
@@ -86,40 +52,56 @@
     avet  [%avet idx=(gas:avet *index items)]
     aevt  [%aevt idx=(gas:aevt *index items)]
   ==
---
-++  slice-index
-  |=  [=index start=indexer-unit stop=indexer-unit]
-  ^-  index
-  *(tree datom)
 
 ++  filter-index
   |=  [=index =filter]
   ^-  index
   =/  om  cor.idx
-  (:om)
+  index
+
+++  search-eav-
+  |=  [q=[e=(unit e) a=(unit a) v=(unit v) tx=(unit tx)] =indexs]
+  ^-  (set datom)
+  (subset:eavt eavt.indexs q(tx tx0) q(tx txmax))
+ 
+++  search-ea-t
+  |=  [q=[e=(unit e) a=(unit a) v=(unit v) tx=(unit tx)] =indexs]
+  ^-  (set datom)
+  =.  all-e-a  
+    (subset:eavt eavt.indexs q(tx tx0) q(tx txmax))
+  %-  (traverse:eavt ,(list datom))
+    :*  all-e-a 
+        state=~
+        |=  [s=(list datom) k=indexer v=datom] 
+        ?:  ?=((need tx) tx.d)
+        [datom s]
+        s
+    ==
+
+
+
 
 ++  search
   |=  [q=[e=(unit e) a=(unit a) v=(unit v) tx=(unit tx)] =indexs]
   ^-  (set datom)
   ?-  q
     [* * * *]  (slice-index eavt.indexs q q)
-    [* * * ~]  (slice-index eavt.indexs q(tx tx0) q(tx txmax))
-    [* * ~ *]  =. all-e-a  (slice-index eavt.indexs q(tx tx0) q(tx txmax))
-               (filter-index all-e-a |=(d=datom  -^  ?  ?:  ?=(tx.d (got tx))))
-    [* * ~ ~]  (slice-index eavt.indexs q(tx tx0) q(tx txmax))
-    [* ~ * *]
-    [* ~ * ~]
-    [* ~ ~ *]
-    [* ~ ~ ~]
-    [~ * * *]
-    [~ * * ~]
-    [~ * ~ *]
-    [~ * ~ ~]
-    [~ ~ * *]
-    [~ ~ * ~]
-    [~ ~ ~ *]
-    [~ ~ ~ ~]
+    [* * * ~]  (search-eav- q indexs) 
+    [* * ~ *]  (search-ea-t q)
+    [* * ~ ~]  (search-ea-- eavt.indexs q(tx tx0) q(tx txmax))
+  ::  [* ~ * *]
+  ::  [* ~ * ~]
+  ::  [* ~ ~ *]
+  ::  [* ~ ~ ~]
+  ::  [~ * * *]
+  ::  [~ * * ~]
+  ::  [~ * ~ *]
+  ::  [~ * ~ ~]
+  ::  [~ ~ * *]
+  ::  [~ ~ * ~]
+  ::  [~ ~ ~ *]
+  ::  [~ ~ ~ ~]
   ==
   
-  
+--  
 
