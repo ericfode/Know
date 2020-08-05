@@ -69,7 +69,7 @@
   ^-  (set datom)
   =.  all-e-a  
     (subset:eavt eavt.indexs q(tx tx0) q(tx txmax))
-  %-  (traverse:eavt ,(list datom))
+  %-  (traverse:eavt ,(set datom))
     :*  all-e-a 
         state=~
         |=  [s=(list datom) k=indexer v=datom] 
@@ -77,6 +77,10 @@
         [datom s]
         s
     ==
+++  search-ea--
+  |=  [q=[e=(unit e) a=(unit a) v=(unit v) tx=(unit tx)] =indexs]
+  ^-  (set datom)
+  (subset:eavt eavt.indexs q(tx tx0) q(tx txmax))
 
 
 
@@ -88,7 +92,7 @@
     [* * * *]  (slice-index eavt.indexs q q)
     [* * * ~]  (search-eav- q indexs) 
     [* * ~ *]  (search-ea-t q)
-    [* * ~ ~]  (search-ea-- eavt.indexs q(tx tx0) q(tx txmax))
+    [* * ~ ~]  (search-ea-- )
   ::  [* ~ * *]
   ::  [* ~ * ~]
   ::  [* ~ ~ *]
