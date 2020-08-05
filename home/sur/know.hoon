@@ -72,13 +72,16 @@
   ^-  ?
   (cmp-datom [a.a v.a e.a tx.a] [a.b v.b e.b tx.b])
 ::
+++  eavt  ((ordered-map indexer datom) cmp-eavt)
+++  avet  ((ordered-map indexer datom) cmp-aevt)
+++  aevt  ((ordered-map indexer datom) cmp-avet)
 --
 |%
 +$  item  (mk-item indexer datom)
 +$  index  
-  $%  [%eavt idx=(tree item) cor=_((ordered-map ,indexer ,datom) cmp-avet)]
-      [%avet idx=(tree item) cor=_((ordered-map ,indexer ,datom) cmp-aevt)]
-      [%aevt idx=(tree item) cor=_((ordered-map ,indexer ,datom) cmp-avet)]
+  $%  [%eavt idx=(tree item) cor=_eavt]
+      [%avet idx=(tree item) cor=_avet]
+      [%aevt idx=(tree item) cor=_aevt]
   ==
 +$  indexs
   $:  eavt=index 

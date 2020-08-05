@@ -29,9 +29,7 @@
 ::  Look in zuse.hoon for the source. There are no docs
 ::  But the comments are epic
 ::
-++  eavt  ((ordered-map indexer datom) cmp-eavt)
-++  avet  ((ordered-map indexer datom) cmp-aevt)
-++  aevt  ((ordered-map indexer datom) cmp-avet)
+
 ::
 ++  datoms-to-items
   |=  [datoms=(set datom)]
@@ -45,49 +43,82 @@
 ++  build-indexs
   |=  [datoms=(set datom)]
   ^-  indexs
-  =/  items  (datoms-to-items datoms)
+  =/  items=(list item)  (datoms-to-items datoms)
   =/  indexs  *indexs
   %_  indexs
-    eavt  [%eavt idx=(gas:eavt *index items)]
-    avet  [%avet idx=(gas:avet *index items)]
-    aevt  [%aevt idx=(gas:aevt *index items)]
+    idx.eavt  (gas:eavt ~ items)
+    idx.avet  (gas:avet ~ items)
+    idx.aevt  (gas:aevt ~ items)
   ==
+::
+++  itod  |=([=indexer =datom] datom)
+::
+
+++  search-eavt
+  |=  [q=[=e =a =v =t] =indexs]
+  ^-  (list datom)
+  =/  itm=(unit datom)  (get:eavt idx.eavt.indexs q)
+  ?~  itm
+    ~
+  ~[u.itm]
 
 ++  search-eav-
-  |=  [q=[=e =a =v tx=(unit tx)] =indexs]
+  |=  [q=[=e =a =v *] =indexs]
   ^-  (list datom)
-  =/  sq=(unit indexer)  `q(tx tx0)
-  =/  eq=(unit indexer)  `q(tx txmax)
-  =/  idx=(tree [indexer datom])  idx.eavt.indexs
-  =/  sub=(tree [indexer datom])   (subset:eavt idx sq eq)
+  =/  sq=(unit indexer)  `[=e =a =v tx=tx0]
+  =/  eq=(unit indexer)  `[=e =a =v tx=tx0]
+  =/  sub=(tree [indexer datom])   (subset:eavt idx.eavt.indexs sq eq)
   =/  items=(list [indexer datom])  (tap:eavt sub)
-  %+  turn  items  |=([=indexer =datom] datom)   
- 
-++  search-ea-t
-  |=  [q=[e=(unit e) a=(unit a) v=(unit v) tx=(unit tx)] =indexs]
-  ^-  (list datom)
-  =.  all-e-a  
-    (subset:eavt eavt.indexs q(tx tx0) q(tx txmax))
-  %-  (traverse:eavt ,(list datom))
-    :*  all-e-a 
-        state=~
-        |=  [s=(list datom) k=indexer v=datom] 
-        ?:  ?=((need tx) tx.d)
-        [datom s]
-        s
-    ==
-++  search-ea--
-  |=  [q=[e=(unit e) a=(unit a) v=(unit v) tx=(unit tx)] =indexs]
-  ^-  (list datom)
-  (tap:eavt (subset:eavt eavt.indexs q(tx tx0) q(tx txmax)))
-
+  (turn items itod)
+:: 
+::
 :: (->> (set/slice eavt (datom e nil nil tx0) (datom e nil nil txmax))  ;; e _ v tx
- ::              (filter (fn [^Datom d] (and (= v (.-v d))
- ::                                          (= tx (datom-tx d))))))
-++  search-ea--
-  |=  [q=[e=(unit e) a=(unit a) v=(unit v) tx=(unit tx)] =indexs]
+::              (filter (fn [^Datom d] (and (= v (.-v d))
+::                                          (= tx (datom-tx d))))))
+++  search-e-vt
+  |=  [q=[=e * =v =tx] =indexs]
   ^-  (list datom)
-  !!
+  =/  sq=(unit indexer)  `[=e a=*a v=*a tx=tx0]
+  =/  eq=(unit indexer)  `[=e a=*a v=*v tx=txmax]
+  =/  all-e=(tree [indexer datom])   
+    (subset:eavt idx.eavt.indexs sq eq)
+  =/  res=[(list datom) (tree item)]
+  %-  (traverse:eavt (list datom))
+    :*  all-e
+        state=~
+        |=  [s=(list datom) i=[* d=datom]] 
+        ^-  [(unit datom) ? (list datom)]
+        ?:  &(=(t tx.d.i) =(v v.d.i))
+            [`d.i & [d.i s]]
+          [~ & s]
+    ==
+  -.res
+::
+++  search-ea-t
+  |=  [q=[=e =a * =tx] =indexs]
+  ^-  (list datom)
+  =/  sq=(unit indexer)   `[=e =a v=~ tx=tx0]
+  =/  eq=(unit indexer)   `[=e =a v=~ tx=txmax]
+  =/  all-ea=(tree item)  (subset:eavt idx.eavt.indexs sq eq)
+  =/  res=[(list datom) (tree item)]
+    %-  (traverse:eavt ,(list datom))
+      :*  all-ea 
+          state=~
+          |=  [s=(list datom) i=[* d=datom]] 
+          ^-  [(unit datom) ? (list datom)]
+          ?:  =(tx tx.d.i)
+            [`d.i & [d.i s]]
+          [~ & s]
+      ==
+  -.res
+::
+++  search-ea--
+  |=  [q=[=e =a * *] =indexs]
+  ^-  (list datom)
+  =/  sq=(unit indexer)  `[=e =a v=~ tx=tx0]
+  =/  eq=(unit indexer)  `[=e =a v=~ tx=txmax]
+  =/  items  (subset:eavt idx.eavt.indexs sq eq)
+  (turn (tap:eavt items) itod)
  
 ::         (->> (set/slice eavt (datom e nil nil tx0) (datom e nil nil txmax))  ;; e _ v _
 ::              (filter (fn [^Datom d] (= v (.-v d)))))
@@ -173,22 +204,24 @@
   |=  [q=[e=(unit e) a=(unit a) v=(unit v) tx=(unit tx)] =indexs]
   ^-  (list datom)
   ?-  q
-    [* * * *]  (get:eavt eavt.indexs q)
-    [* * * ~]  (search-eav- q(e u.e.q, a u.a.q, v u.v.q, tx ~) indexs) 
-    [* * ~ *]  (search-ea-t q)
-    [* * ~ ~]  (search-ea-- q indexs)
-  ::  [* ~ * *]
-  ::  [* ~ * ~]
-  ::  [* ~ ~ *]
-  ::  [* ~ ~ ~]
-  ::  [~ * * *]
-  ::  [~ * * ~]
-  ::  [~ * ~ *]
-  ::  [~ * ~ ~]
-  ::  [~ ~ * *]
-  ::  [~ ~ * ~]
-  ::  [~ ~ ~ *]
-  ::  [~ ~ ~ ~]
+    [~ ~ ~ ~]  *(list datom)    
+    [~ ~ ~ *]  *(list datom)
+    [~ ~ * ~]  *(list datom)
+    [~ ~ * *]  *(list datom)
+    [~ * ~ ~]  *(list datom)
+    [~ * ~ *]  *(list datom)
+    [~ * * ~]  *(list datom)
+    [~ * * *]  *(list datom)
+    [* ~ ~ ~]  *(list datom)
+    [* ~ ~ *]  *(list datom)
+    [* ~ * ~]  *(list datom)
+    [* ~ * *]  *(list datom)
+    [* * ~ ~]  (search-ea-- [e=(need e.q) a=(need a.q) v=~ tx=~] indexs)
+    [* * ~ *]  (search-ea-t [e=(need e.q) a=(need a.q) v=~ tx=(need tx.q)] indexs)
+    [* * * ~]  (search-eav- [e=(need e.q) a=(need a.q) v=(need v.q) tx=~] indexs) 
+    [* * * *]  
+  (search-eavt [e=(need e.q) a=(need a.q) v=(need v.q) tx=(need tx.q)] indexs)
+ 
   ==
   
 --  
