@@ -20,7 +20,7 @@
       =tx
       =hash
   ==
-+$  indexer-unit
++$  indexer
   $:  e=(unit e)
       a=(unit a)
       v=(unit v)
@@ -29,22 +29,22 @@
 +$  filter  
   $~  |=([d=datom] &)
   $-(datom ?)
-+$  indexer
-  $:  =e
-      =a
-      =v
-      =tx
-  ==
 --
 |%
-::
+::  If either data is null return true
+::  we want this so that we can null out values in indexers to
+::  select slices of data.
 ++  ncmp
-  |*  [a=* b=*]
+  |*  [a=(unit *) b=(unit *)]
   ?~  a  &
   ?~  b  &
-  =(a b)
+  =(u.a u.b)
+
 ++  cmp-datom
-  |*  [[a1=* a2=* a3=* a4=*] [b1=* b2=* b3=* b4=*]]
+  |*  $:  
+      [a1=(unit *) a2=(unit *) a3=(unit *) a4=(unit *)] 
+      [b1=(unit *) b2=(unit *) b3=(unit *) b4=(unit *)]
+      ==
   ::  TODO assert the types of each pair are the same 
   ^-  ?
   ?:  (ncmp a1 b1)
@@ -52,10 +52,10 @@
       ?:  (ncmp a3 b3)
         ?:  (ncmp a4 b4)
           &
-        (dor a4 b4)
-      (dor a3 b3)
-    (dor a2 b2)
-  (dor a1 b1)
+        (dor (need a4) (need b4))
+      (dor (need a3) (need b3))
+    (dor (need a2) (need b2))
+  (dor (need a1) (need b1))
 ::
 ++  cmp-eavt
   |=  [a=indexer b=indexer]
