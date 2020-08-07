@@ -80,12 +80,19 @@
 +$  item  (mk-item indexer datom)
 +$  index  
   $%  [%eavt idx=(tree item) cor=_eavt]
-      [%avet idx=(tree item) cor=_avet]
+      [%avet idx=(tree item) cor=_avet attrs=(set a)]
       [%aevt idx=(tree item) cor=_aevt]
   ==
 +$  indexs
   $:  eavt=index 
       avet=index
       aevt=index
+  ==
++$  db
+  $:  
+    indexed-attrs=(set a)
+    =indexs
+    maxtx=tx
+    maxeid=e
   ==
 --
