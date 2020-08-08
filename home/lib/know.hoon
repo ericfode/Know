@@ -57,7 +57,7 @@
   |=  [datoms=(set datom) indexed-attrs=(set a)]
   ^-  indexs
   =/  items=(list item)       (datoms-to-items datoms)
-  =/  indexed=(set datom)    (datoms-by-attrs datoms indexed-attrs)
+  =/  indexed=(set datom)     (datoms-by-attrs datoms indexed-attrs)
   =/  avet-items=(list item)  (datoms-to-items indexed)
   =/  indexs   *indexs
   %_  indexs
@@ -105,7 +105,7 @@
         ^-  [(unit datom) ? (list datom)]
         ?:  &(=((need tx.q) tx.d.i) =((need v.q) v.d.i))
             [`d.i | [d.i s]]
-          [~ | s]
+          [`d.i | s]
     ==
   (flop -.res)
 ::
@@ -124,7 +124,7 @@
           ^-  [(unit datom) ? (list datom)]
           ?:  =((need tx.q) tx.d.i)
             [`d.i | [d.i s]]
-          [~ | s]
+          [`d.i | s]
       ==
   :: (turn (tap:eavt +.res) itemtod)    is this better?
   (flop -.res)
@@ -153,7 +153,7 @@
         ^-  [(unit datom) ? (list datom)]
         ?:  =((need v.q) v.d.i)
             [`d.i | [d.i s]]
-          [~ | s]
+          [`d.i | s]
     ==
   (flop -.res) 
 
@@ -174,7 +174,7 @@
         ^-  [(unit datom) ? (list datom)]
         ?:  =((need tx.q) tx.d.i)
             [`d.i | [d.i s]]
-          [~ | s]
+          [`d.i | s]
     ==
   (flop -.res) 
 ::         (set/slice eavt (datom e nil nil tx0) (datom e nil nil txmax))       ;; e _ _ _
@@ -205,8 +205,9 @@
           ^-  [(unit datom) ? (list datom)]
           ?:  =((need tx.q) tx.d.i)
               [`d.i | [d.i s]]
-            [~ | s]
+            [`d.i | s]
       ==
+
   (flop -.res) 
 
  ::           (->> (set/slice aevt (datom e0 a nil tx0) (datom emax a nil txmax))
@@ -227,7 +228,7 @@
           ^-  [(unit datom) ? (list datom)]
           ?:  &(=((need v.q) v.d.i) =((need tx.q) tx.d.i))
               [`d.i | [d.i s]]
-            [~ | s]
+            [`d.i | s]
       ==
   (flop -.res) 
 
@@ -261,7 +262,7 @@
           ^-  [(unit datom) ? (list datom)]
           ?:  =((need v.q) v.d.i) 
               [`d.i | [d.i s]]
-            [~ | s]
+            [`d.i | s]
       ==
   (flop -.res) 
  
@@ -283,7 +284,7 @@
           ^-  [(unit datom) ? (list datom)]
           ?:  =((need tx.q) tx.d.i)
               [`d.i | [d.i s]]
-            [~ | s]
+            [`d.i | s]
       ==
   (flop -.res) 
  
@@ -293,8 +294,8 @@
   ^-  (list datom)
   =/  sq=(unit indexer)             `q(e `e0, tx `tx0)
   =/  eq=(unit indexer)             `q(e `emax, tx `txmax)
-  =/  sub=(tree [indexer datom])    (subset:eavt idx.eavt.indexs sq eq)
-  =/  items=(list [indexer datom])  (tap:eavt sub)
+  =/  sub=(tree [indexer datom])    (subset:aevt idx.aevt.indexs sq eq)
+  =/  items=(list [indexer datom])  (tap:aevt sub)
   (turn items itemtod)
  ::         (filter (fn [^Datom d] (and (= v (.-v d))
  ::                                     (= tx (datom-tx d)))) eavt)                ;; _ _ v tx
@@ -309,7 +310,7 @@
           ^-  [(unit datom) ? (list datom)]
           ?:  &(=((need v.q) v.d.i) =((need tx.q) tx.d.i))
               [`d.i | [d.i s]]
-            [~ | s]
+            [`d.i | s]
       ==
   (flop -.res)
  
@@ -325,7 +326,7 @@
           ^-  [(unit datom) ? (list datom)]
           ?:  =((need v.q) v.d.i)
               [`d.i | [d.i s]]
-            [~ | s]
+            [`d.i | s]
       ==
   (flop -.res)
  
@@ -341,7 +342,7 @@
           ^-  [(unit datom) ? (list datom)]
           ?:  =((need tx.q) tx.d.i)
               [`d.i | [d.i s]]
-            [~ | s]
+            [`d.i | s]
       ==
   (flop -.res)
  
@@ -363,14 +364,14 @@
     [~ ~ * ~]  (search---v- q indexs)
     [~ ~ * *]  (search---vt q indexs)
     [~ * ~ ~]  (search--a-- q indexs)
-    [~ * ~ *]  (search--a-t q indexs)
-    [~ * * ~]  (search--av- q indexs)
-    [~ * * *]  (search--avt q indexs)
-    [* ~ ~ ~]  (search-e--- q indexs)
-    [* ~ ~ *]  (search--av- q indexs)
-    [* ~ * ~]  (search-e-v- q indexs)
-    [* ~ * *]  (search-e-vt q indexs)
-    [* * ~ ~]  (search-ea-- q indexs)
+    [~ * ~ *]  (search--a-t q indexs) :: Tested
+    [~ * * ~]  (search--av- q indexs) 
+    [~ * * *]  (search--avt q indexs)  
+    [* ~ ~ ~]  (search-e--- q indexs)  
+    [* ~ ~ *]  (search-e--t q indexs)  
+    [* ~ * ~]  (search-e-v- q indexs) 
+    [* ~ * *]  (search-e-vt q indexs)  
+    [* * ~ ~]  (search-ea-- q indexs)  
     [* * ~ *]  (search-ea-t q indexs)
     [* * * ~]  (search-eav- q indexs) 
     [* * * *]  (search-eavt q indexs)
