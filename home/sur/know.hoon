@@ -78,15 +78,23 @@
 --
 |%
 +$  item  (mk-item indexer datom)
-+$  index  
-  $%  [%eavt idx=(tree item) cor=_eavt]
-      [%avet idx=(tree item) cor=_avet attrs=(set a)]
-      [%aevt idx=(tree item) cor=_aevt]
++$  eavt-index 
+  $:  idx=(tree item) 
+      cor=_eavt
+  ==
++$  avet-index 
+  $:  idx=(tree item) 
+      cor=_avet
+      attrs=(set a)
+  ==
++$  aevt-index 
+  $:  idx=(tree item) 
+      cor=_aevt
   ==
 +$  indexs
-  $:  eavt=index 
-      avet=index
-      aevt=index
+  $:  eavt=eavt-index
+      avet=avet-index
+      aevt=aevt-index
   ==
 +$  db
   $:  

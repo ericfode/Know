@@ -62,7 +62,7 @@
           |=  x=@
           d(v x)
     sy
-  =+  basic-index=(build-indexs:know datoms) 
+  =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  ~[d(v 6)]
@@ -85,7 +85,7 @@
      :~  d(e 1, a %test, v 1, tx 1)
        d(e 1, a %test, v 1, tx 2)
      ==
-  =+  basic-index=(build-indexs:know datoms) 
+  =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  expected
@@ -103,7 +103,7 @@
        d(e 2, a %test, v 1, tx 2)
        d(e 2, a %top, v 1, tx 2)
      ==
-  =+  basic-index=(build-indexs:know datoms) 
+  =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
@@ -132,7 +132,7 @@
        d(e 2, a %test, v 1, tx 2)
        d(e 2, a %test, v 1, tx 2)
      ==
-  =+  basic-index=(build-indexs:know datoms) 
+  =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
@@ -161,7 +161,7 @@
        d(e 2, a %test, v 1, tx 2)
        d(e 2, a %test, v 1, tx 2)
      ==
-  =+  basic-index=(build-indexs:know datoms) 
+  =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
