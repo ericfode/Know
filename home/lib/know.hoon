@@ -363,8 +363,8 @@
     [~ ~ ~ *]  (search----t q indexs)
     [~ ~ * ~]  (search---v- q indexs)
     [~ ~ * *]  (search---vt q indexs)
-    [~ * ~ ~]  (search--a-- q indexs)
-    [~ * ~ *]  (search--a-t q indexs) :: Tested
+    [~ * ~ ~]  (search--a-- q indexs) 
+    [~ * ~ *]  (search--a-t q indexs) 
     [~ * * ~]  (search--av- q indexs) 
     [~ * * *]  (search--avt q indexs)  
     [* ~ ~ ~]  (search-e--- q indexs)  

@@ -4,7 +4,7 @@
 
 |%
 +$  e      @             :: Entity id
-+$  a      term          :: Attribute a @tas / like %attr
++$  a      $:([n=term v=term])   :: Namespaced Attr
 +$  v      noun          :: A value
 +$  t      @d            :: Time
 +$  added  ?             :: If it's been added
@@ -96,11 +96,22 @@
       avet=avet-index
       aevt=aevt-index
   ==
++$  schema-entry
+  $:  ident=a
+      =mold
+      cardinality=?(%one %many)
+      doc=cord
+      unique=?(%not %value %identity)
+      pred=$-(vase ?)
+      index=?
+  ==
++$  schema (map a schema-entry)
 +$  db
   $:  
     indexed-attrs=(set a)
     =indexs
     maxtx=tx
     maxeid=e
+    =hash
   ==
 --

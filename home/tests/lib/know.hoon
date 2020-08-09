@@ -13,7 +13,7 @@
 ++  test-correct-bunt
   %+  expect-eq
     !>  ^-  datom:know-sur  
-    d=[e=0 a=%$ v=0 t=0x0 added=%.y tx=0 hash=~zod]
+    d=[e=0 a=[%$ %$] v=0 t=0x0 added=%.y tx=0 hash=~zod]
     !>  (new-datom:know)
 ::
 ++  test-correct-order-e
@@ -74,47 +74,47 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
      %-  sy  
-     :~  d(e 1, a %test, v 1, tx 1)
-       d(e 2, a %test, v 8, tx 3)
-       d(e 3, a %test, v 7, tx 4)
-       d(e 1, a %test, v 2, tx 2)
-       d(e 1, a %test, v 1, tx 2)
-       d(e 1, a %test, v 4, tx 9)
+     :~  d(e 1, a [%test %test], v 1, tx 1)
+       d(e 2, a [%test %test], v 8, tx 3)
+       d(e 3, a [%test %test], v 7, tx 4)
+       d(e 1, a [%test %test], v 2, tx 2)
+       d(e 1, a [%test %test], v 1, tx 2)
+       d(e 1, a [%test %test], v 4, tx 9)
      ==
   =/  expected=(list datom:know-sur)
-     :~  d(e 1, a %test, v 1, tx 1)
-       d(e 1, a %test, v 1, tx 2)
+     :~  d(e 1, a [%test %test], v 1, tx 1)
+       d(e 1, a [%test %test], v 1, tx 2)
      ==
   =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  expected
-      !>  (search-eav-:know indexer(v `1, e `1, a `%test) basic-index)
+      !>  (search-eav-:know indexer(v `1, e `1, a `[%test %test]) basic-index)
   ==
 ++  test-search-e-vt
   =+  indexer=(dtoi:know (new-datom:know))
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
      %-  sy  
-     :~  d(e 1, a %test, v 1, tx 2)
-       d(e 1, a %boop, v 1, tx 1)
-       d(e 1, a %bop, v 1, tx 1)
-       d(e 1, a %test, v 2, tx 2)
-       d(e 2, a %test, v 1, tx 2)
-       d(e 2, a %top, v 1, tx 2)
+     :~  d(e 1, a [%test %test], v 1, tx 2)
+       d(e 1, a [%boop %boop], v 1, tx 1)
+       d(e 1, a [%bop %bop], v 1, tx 1)
+       d(e 1, a [%test %test], v 2, tx 2)
+       d(e 2, a [%test %test], v 1, tx 2)
+       d(e 2, a [%top %top], v 1, tx 2)
      ==
   =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-       d(e 1, a %bop, v 1, tx 1)
-       d(e 1, a %boop, v 1, tx 1)
+       d(e 1, a [%bop %bop], v 1, tx 1)
+       d(e 1, a [%boop %boop], v 1, tx 1)
       ==
       !>  (search-e-vt:know indexer(e `1, a ~, v `1, tx `1) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-       d(e 2, a %top, v 1, tx 2)
-       d(e 2, a %test, v 1, tx 2)
+       d(e 2, a [%top %top], v 1, tx 2)
+       d(e 2, a [%test %test], v 1, tx 2)
       ==
       !>  (search-e-vt:know indexer(e `2, a ~, v `1, tx `2) basic-index)
   ==
@@ -124,28 +124,28 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
      %-  sy  
-     :~  d(e 1, a %test, v 1, tx 1)
-       d(e 1, a %boop, v 1, tx 1)
-       d(e 1, a %bop, v 1, tx 1)
-       d(e 1, a %test, v 2, tx 1)
-       d(e 1, a %test, v 3, tx 1)
-       d(e 2, a %test, v 1, tx 2)
-       d(e 2, a %test, v 1, tx 2)
+     :~  d(e 1, a [%test %test], v 1, tx 1)
+       d(e 1, a [%boop %boop], v 1, tx 1)
+       d(e 1, a [%bop %bop], v 1, tx 1)
+       d(e 1, a [%test %test], v 2, tx 1)
+       d(e 1, a [%test %test], v 3, tx 1)
+       d(e 2, a [%test %test], v 1, tx 2)
+       d(e 2, a [%test %test], v 1, tx 2)
      ==
   =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-       d(e 1, a %test, v 1, tx 1)
-       d(e 1, a %test, v 2, tx 1)
-       d(e 1, a %test, v 3, tx 1)
+       d(e 1, a [%test %test], v 1, tx 1)
+       d(e 1, a [%test %test], v 2, tx 1)
+       d(e 1, a [%test %test], v 3, tx 1)
       ==
-      !>  (search-ea-t:know indexer(e `1, a `%test, v ~, tx `1) basic-index)
+      !>  (search-ea-t:know indexer(e `1, a `[%test %test], v ~, tx `1) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-       d(e 2, a %test, v 1, tx 2)
+       d(e 2, a [%test %test], v 1, tx 2)
       ==
-      !>  (search-ea-t:know indexer(e `2, a `%test, v ~, tx `2) basic-index)
+      !>  (search-ea-t:know indexer(e `2, a `[%test %test], v ~, tx `2) basic-index)
   ==
 
 ++  test-search-ea--
@@ -153,28 +153,28 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
      %-  sy  
-     :~  d(e 1, a %test, v 1, tx 1)
-       d(e 1, a %boop, v 1, tx 1)
-       d(e 1, a %bop, v 1, tx 1)
-       d(e 1, a %test, v 2, tx 2)
-       d(e 1, a %test, v 3, tx 3)
-       d(e 2, a %test, v 1, tx 2)
-       d(e 2, a %test, v 1, tx 2)
+     :~  d(e 1, a [%test %test], v 1, tx 1)
+       d(e 1, a [%boop %boop], v 1, tx 1)
+       d(e 1, a [%bop %bop], v 1, tx 1)
+       d(e 1, a [%test %test], v 2, tx 2)
+       d(e 1, a [%test %test], v 3, tx 3)
+       d(e 2, a [%test %test], v 1, tx 2)
+       d(e 2, a [%test %test], v 1, tx 2)
      ==
   =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-       d(e 1, a %test, v 1, tx 1)
-       d(e 1, a %test, v 2, tx 2)
-       d(e 1, a %test, v 3, tx 3)
+       d(e 1, a [%test %test], v 1, tx 1)
+       d(e 1, a [%test %test], v 2, tx 2)
+       d(e 1, a [%test %test], v 3, tx 3)
       ==
-      !>  (search-ea--:know indexer(e `1, a `%test, v ~, tx ~) basic-index)
+      !>  (search-ea--:know indexer(e `1, a `[%test %test], v ~, tx ~) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-       d(e 2, a %test, v 1, tx 2)
+       d(e 2, a [%test %test], v 1, tx 2)
       ==
-      !>  (search-ea--:know indexer(e `2, a `%test, v ~, tx ~) basic-index)
+      !>  (search-ea--:know indexer(e `2, a `[%test %test], v ~, tx ~) basic-index)
   ==
 
 ++  test-search-e-v-
@@ -182,27 +182,27 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
      %-  sy  
-     :~  d(e 1, a %test, v 1, tx 1)
-       d(e 1, a %boop, v 1, tx 1)
-       d(e 1, a %bop, v 1, tx 1)
-       d(e 1, a %test, v 2, tx 2)
-       d(e 1, a %test, v 3, tx 3)
-       d(e 2, a %test, v 1, tx 2)
-       d(e 2, a %test, v 1, tx 3)
+     :~  d(e 1, a [%test %test], v 1, tx 1)
+       d(e 1, a [%boop %boop], v 1, tx 1)
+       d(e 1, a [%bop %bop], v 1, tx 1)
+       d(e 1, a [%test %test], v 2, tx 2)
+       d(e 1, a [%test %test], v 3, tx 3)
+       d(e 2, a [%test %test], v 1, tx 2)
+       d(e 2, a [%test %test], v 1, tx 3)
      ==
   =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %bop, v 1, tx 1)
-        d(e 1, a %boop, v 1, tx 1)
-        d(e 1, a %test, v 1, tx 1)
+        d(e 1, a [%bop %bop], v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 1)
+        d(e 1, a [%test %test], v 1, tx 1)
       ==
       !>  (search:know indexer(e `1, a ~, v `1, tx ~) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 2, a %test, v 1, tx 2)
-        d(e 2, a %test, v 1, tx 3)
+        d(e 2, a [%test %test], v 1, tx 2)
+        d(e 2, a [%test %test], v 1, tx 3)
       ==
       !>  (search:know indexer(e `2, a ~, v `1, tx ~) basic-index)
   ==
@@ -212,26 +212,26 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
      %-  sy  
-     :~  d(e 1, a %test, v 1, tx 1)
-       d(e 1, a %boop, v 1, tx 1)
-       d(e 1, a %bop, v 1, tx 1)
-       d(e 1, a %test, v 2, tx 2)
-       d(e 1, a %test, v 3, tx 3)
-       d(e 2, a %test, v 1, tx 2)
-       d(e 2, a %test, v 1, tx 3)
+     :~  d(e 1, a [%test %test], v 1, tx 1)
+       d(e 1, a [%boop %boop], v 1, tx 1)
+       d(e 1, a [%bop %bop], v 1, tx 1)
+       d(e 1, a [%test %test], v 2, tx 2)
+       d(e 1, a [%test %test], v 3, tx 3)
+       d(e 2, a [%test %test], v 1, tx 2)
+       d(e 2, a [%test %test], v 1, tx 3)
      ==
   =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %bop, v 1, tx 1)
-        d(e 1, a %boop, v 1, tx 1)
-        d(e 1, a %test, v 1, tx 1)
+        d(e 1, a [%bop %bop], v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 1)
+        d(e 1, a [%test %test], v 1, tx 1)
       ==
       !>  (search:know indexer(e `1, a ~, v ~, tx `1) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %test, v 2, tx 2)
+        d(e 1, a [%test %test], v 2, tx 2)
       ==
       !>  (search:know indexer(e `1, a ~, v ~, tx `2) basic-index)
   ==
@@ -241,29 +241,29 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
     %-  sy  
-    :~  d(e 1, a %test, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 1)
-      d(e 1, a %bop, v 1, tx 1)
-      d(e 1, a %test, v 2, tx 2)
-      d(e 1, a %test, v 3, tx 3)
-      d(e 2, a %test, v 1, tx 2)
-      d(e 2, a %test, v 1, tx 3)
+    :~  d(e 1, a [%test %test], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 1)
+      d(e 1, a [%bop %bop], v 1, tx 1)
+      d(e 1, a [%test %test], v 2, tx 2)
+      d(e 1, a [%test %test], v 3, tx 3)
+      d(e 2, a [%test %test], v 1, tx 2)
+      d(e 2, a [%test %test], v 1, tx 3)
     ==
   =+  basic-index=(build-indexs:know datoms ~) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %bop, v 1, tx 1)
-        d(e 1, a %boop, v 1, tx 1)
-        d(e 1, a %test, v 1, tx 1)
-        d(e 1, a %test, v 2, tx 2)
-        d(e 1, a %test, v 3, tx 3)
+        d(e 1, a [%bop %bop], v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 1)
+        d(e 1, a [%test %test], v 1, tx 1)
+        d(e 1, a [%test %test], v 2, tx 2)
+        d(e 1, a [%test %test], v 3, tx 3)
       ==
       !>  (search:know indexer(e `1, a ~, v ~, tx ~) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 2, a %test, v 1, tx 2)
-        d(e 2, a %test, v 1, tx 3)
+        d(e 2, a [%test %test], v 1, tx 2)
+        d(e 2, a [%test %test], v 1, tx 3)
       ==
       !>  (search:know indexer(e `2, a ~, v ~, tx ~) basic-index)
   ==
@@ -273,27 +273,27 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
     %-  sy  
-    :~  d(e 1, a %test, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 1)
-      d(e 1, a %bop, v 1, tx 1)
-      d(e 1, a %test, v 1, tx 2)
-      d(e 1, a %test, v 1, tx 3)
-      d(e 2, a %test, v 1, tx 2)
-      d(e 2, a %test, v 1, tx 3)
+    :~  d(e 1, a [%test %test], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 1)
+      d(e 1, a [%bop %bop], v 1, tx 1)
+      d(e 1, a [%test %test], v 1, tx 2)
+      d(e 1, a [%test %test], v 1, tx 3)
+      d(e 2, a [%test %test], v 1, tx 2)
+      d(e 2, a [%test %test], v 1, tx 3)
     ==
-  =+  basic-index=(build-indexs:know datoms (sy `(list @tas)`[%test ~])) 
+  =+  basic-index=(build-indexs:know datoms (sy `(list a:know-sur)`[[%test %test] ~])) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %test, v 1, tx 2)
-        d(e 2, a %test, v 1, tx 2)
+        d(e 1, a [%test %test], v 1, tx 2)
+        d(e 2, a [%test %test], v 1, tx 2)
       ==
-      !>  (search:know indexer(e ~, a `%test, v `1, tx `2) basic-index)
+      !>  (search:know indexer(e ~, a `[%test %test], v `1, tx `2) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %boop, v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 1)
       ==
-      !>  (search:know indexer(e ~, a `%boop, v `1, tx `1) basic-index)
+      !>  (search:know indexer(e ~, a `[%boop %boop], v `1, tx `1) basic-index)
   ==
 
 
@@ -302,32 +302,32 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
     %-  sy  
-    :~  d(e 1, a %test, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 2)
-      d(e 1, a %bop, v 1, tx 1)
-      d(e 1, a %test, v 1, tx 2)
-      d(e 1, a %test, v 1, tx 3)
-      d(e 2, a %test, v 1, tx 2)
-      d(e 2, a %test, v 1, tx 3)
+    :~  d(e 1, a [%test %test], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 2)
+      d(e 1, a [%bop %bop], v 1, tx 1)
+      d(e 1, a [%test %test], v 1, tx 2)
+      d(e 1, a [%test %test], v 1, tx 3)
+      d(e 2, a [%test %test], v 1, tx 2)
+      d(e 2, a [%test %test], v 1, tx 3)
     ==
-  =+  basic-index=(build-indexs:know datoms (sy `(list @tas)`[%test ~])) 
+  =+  basic-index=(build-indexs:know datoms (sy `(list a:know-sur)`[[%test %test] ~])) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %test, v 1, tx 1)
-        d(e 1, a %test, v 1, tx 2)
-        d(e 1, a %test, v 1, tx 3)
-        d(e 2, a %test, v 1, tx 2)
-        d(e 2, a %test, v 1, tx 3)
+        d(e 1, a [%test %test], v 1, tx 1)
+        d(e 1, a [%test %test], v 1, tx 2)
+        d(e 1, a [%test %test], v 1, tx 3)
+        d(e 2, a [%test %test], v 1, tx 2)
+        d(e 2, a [%test %test], v 1, tx 3)
       ==
-      !>  (search:know indexer(e ~, a `%test, v `1, tx ~) basic-index)
+      !>  (search:know indexer(e ~, a `[%test %test], v `1, tx ~) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %boop, v 1, tx 1)
-        d(e 1, a %boop, v 1, tx 2)
+        d(e 1, a [%boop %boop], v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 2)
       ==
-      !>  (search:know indexer(e ~, a `%boop, v `1, tx ~) basic-index)
+      !>  (search:know indexer(e ~, a `[%boop %boop], v `1, tx ~) basic-index)
   ==
 
 ++  test-search--a-t
@@ -335,28 +335,28 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
     %-  sy  
-    :~  d(e 1, a %test, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 2)
-      d(e 1, a %bop, v 1, tx 1)
-      d(e 1, a %test, v 1, tx 2)
-      d(e 1, a %test, v 1, tx 3)
-      d(e 2, a %test, v 1, tx 2)
-      d(e 2, a %test, v 1, tx 3)
+    :~  d(e 1, a [%test %test], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 2)
+      d(e 1, a [%bop %bop], v 1, tx 1)
+      d(e 1, a [%test %test], v 1, tx 2)
+      d(e 1, a [%test %test], v 1, tx 3)
+      d(e 2, a [%test %test], v 1, tx 2)
+      d(e 2, a [%test %test], v 1, tx 3)
     ==
-  =+  basic-index=(build-indexs:know datoms (sy `(list @tas)`[%test ~])) 
+  =+  basic-index=(build-indexs:know datoms (sy `(list a:know-sur)`[[%test %test] ~])) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %test, v 1, tx 2)
-        d(e 2, a %test, v 1, tx 2)
+        d(e 1, a [%test %test], v 1, tx 2)
+        d(e 2, a [%test %test], v 1, tx 2)
       ==
-      !>  (search:know indexer(e ~, a `%test, v ~, tx `2) basic-index)
+      !>  (search:know indexer(e ~, a `[%test %test], v ~, tx `2) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %boop, v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 1)
       ==
-      !>  (search:know indexer(e ~, a `%boop, v ~, tx `1) basic-index)
+      !>  (search:know indexer(e ~, a `[%boop %boop], v ~, tx `1) basic-index)
   ==
 
 ++  test-search--a--
@@ -364,32 +364,32 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
     %-  sy  
-    :~  d(e 1, a %test, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 2)
-      d(e 1, a %bop, v 1, tx 1)
-      d(e 1, a %test, v 1, tx 2)
-      d(e 1, a %test, v 1, tx 3)
-      d(e 2, a %test, v 1, tx 2)
-      d(e 2, a %test, v 1, tx 3)
+    :~  d(e 1, a [%test %test], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 2)
+      d(e 1, a [%bop %bop], v 1, tx 1)
+      d(e 1, a [%test %test], v 1, tx 2)
+      d(e 1, a [%test %test], v 1, tx 3)
+      d(e 2, a [%test %test], v 1, tx 2)
+      d(e 2, a [%test %test], v 1, tx 3)
     ==
-  =+  basic-index=(build-indexs:know datoms (sy `(list @tas)`[%test ~])) 
+  =+  basic-index=(build-indexs:know datoms (sy `(list a:know-sur)`[[%test %test] ~])) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %test, v 1, tx 1)
-        d(e 1, a %test, v 1, tx 2)
-        d(e 1, a %test, v 1, tx 3)
-        d(e 2, a %test, v 1, tx 2)
-        d(e 2, a %test, v 1, tx 3)
+        d(e 1, a [%test %test], v 1, tx 1)
+        d(e 1, a [%test %test], v 1, tx 2)
+        d(e 1, a [%test %test], v 1, tx 3)
+        d(e 2, a [%test %test], v 1, tx 2)
+        d(e 2, a [%test %test], v 1, tx 3)
       ==
-      !>  (search:know indexer(e ~, a `%test, v ~, tx ~) basic-index)
+      !>  (search:know indexer(e ~, a `[%test %test], v ~, tx ~) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %boop, v 1, tx 1)
-        d(e 1, a %boop, v 1, tx 2)
+        d(e 1, a [%boop %boop], v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 2)
       ==
-      !>  (search:know indexer(e ~, a `%boop, v ~, tx ~) basic-index)
+      !>  (search:know indexer(e ~, a `[%boop %boop], v ~, tx ~) basic-index)
   ==
 
 ++  test-search---vt
@@ -397,29 +397,29 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
     %-  sy  
-    :~  d(e 1, a %test, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 2)
-      d(e 1, a %bop, v 1, tx 1)
-      d(e 1, a %test, v 1, tx 2)
-      d(e 1, a %test, v 1, tx 3)
-      d(e 2, a %test, v 1, tx 2)
-      d(e 2, a %test, v 1, tx 3)
+    :~  d(e 1, a [%test %test], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 2)
+      d(e 1, a [%bop %bop], v 1, tx 1)
+      d(e 1, a [%test %test], v 1, tx 2)
+      d(e 1, a [%test %test], v 1, tx 3)
+      d(e 2, a [%test %test], v 1, tx 2)
+      d(e 2, a [%test %test], v 1, tx 3)
     ==
-  =+  basic-index=(build-indexs:know datoms (sy `(list @tas)`[%test ~])) 
+  =+  basic-index=(build-indexs:know datoms (sy `(list a:know-sur)`[[%test %test] ~])) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %bop, v 1, tx 1)
-        d(e 1, a %boop, v 1, tx 1)
-        d(e 1, a %test, v 1, tx 1)
+        d(e 1, a [%bop %bop], v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 1)
+        d(e 1, a [%test %test], v 1, tx 1)
       ==
       !>  (search:know indexer(e ~, a ~, v `1, tx `1) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %boop, v 1, tx 2)
-        d(e 1, a %test, v 1, tx 2)
-        d(e 2, a %test, v 1, tx 2)
+        d(e 1, a [%boop %boop], v 1, tx 2)
+        d(e 1, a [%test %test], v 1, tx 2)
+        d(e 2, a [%test %test], v 1, tx 2)
       ==
       !>  (search:know indexer(e ~, a ~, v `1, tx `2) basic-index)
   ==
@@ -429,31 +429,31 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
     %-  sy  
-    :~  d(e 1, a %test, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 2)
-      d(e 1, a %bop, v 1, tx 1)
-      d(e 1, a %test, v 1, tx 2)
-      d(e 1, a %test, v 2, tx 3)
-      d(e 2, a %test, v 2, tx 2)
-      d(e 2, a %test, v 2, tx 3)
+    :~  d(e 1, a [%test %test], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 2)
+      d(e 1, a [%bop %bop], v 1, tx 1)
+      d(e 1, a [%test %test], v 1, tx 2)
+      d(e 1, a [%test %test], v 2, tx 3)
+      d(e 2, a [%test %test], v 2, tx 2)
+      d(e 2, a [%test %test], v 2, tx 3)
     ==
-  =+  basic-index=(build-indexs:know datoms (sy `(list @tas)`[%test ~])) 
+  =+  basic-index=(build-indexs:know datoms (sy `(list a:know-sur)`[[%test %test] ~])) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %bop, v 1, tx 1)
-        d(e 1, a %boop, v 1, tx 1)
-        d(e 1, a %boop, v 1, tx 2)
-        d(e 1, a %test, v 1, tx 1)
-        d(e 1, a %test, v 1, tx 2)
+        d(e 1, a [%bop %bop], v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 2)
+        d(e 1, a [%test %test], v 1, tx 1)
+        d(e 1, a [%test %test], v 1, tx 2)
       ==
       !>  (search:know indexer(e ~, a ~, v `1, tx ~) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %test, v 2, tx 3)
-        d(e 2, a %test, v 2, tx 2)
-        d(e 2, a %test, v 2, tx 3)
+        d(e 1, a [%test %test], v 2, tx 3)
+        d(e 2, a [%test %test], v 2, tx 2)
+        d(e 2, a [%test %test], v 2, tx 3)
       ==
       !>  (search:know indexer(e ~, a ~, v `2, tx ~) basic-index)
   ==
@@ -463,29 +463,29 @@
   =+  d=(new-datom:know)
   =/  datoms=(set datom:know-sur)
     %-  sy  
-    :~  d(e 1, a %test, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 2)
-      d(e 1, a %bop, v 1, tx 1)
-      d(e 1, a %test, v 1, tx 2)
-      d(e 1, a %test, v 2, tx 3)
-      d(e 2, a %test, v 2, tx 2)
-      d(e 2, a %test, v 2, tx 3)
+    :~  d(e 1, a [%test %test], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 2)
+      d(e 1, a [%bop %bop], v 1, tx 1)
+      d(e 1, a [%test %test], v 1, tx 2)
+      d(e 1, a [%test %test], v 2, tx 3)
+      d(e 2, a [%test %test], v 2, tx 2)
+      d(e 2, a [%test %test], v 2, tx 3)
     ==
-  =+  basic-index=(build-indexs:know datoms (sy `(list @tas)`[%test ~])) 
+  =+  basic-index=(build-indexs:know datoms (sy `(list a:know-sur)`[[%test %test] ~])) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %bop, v 1, tx 1)
-        d(e 1, a %boop, v 1, tx 1)
-        d(e 1, a %test, v 1, tx 1)
+        d(e 1, a [%bop %bop], v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 1)
+        d(e 1, a [%test %test], v 1, tx 1)
       ==
       !>  (search:know indexer(e ~, a ~, v ~, tx `1) basic-index)
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %boop, v 1, tx 2)
-        d(e 1, a %test, v 1, tx 2)
-        d(e 2, a %test, v 2, tx 2)
+        d(e 1, a [%boop %boop], v 1, tx 2)
+        d(e 1, a [%test %test], v 1, tx 2)
+        d(e 2, a [%test %test], v 2, tx 2)
       ==
       !>  (search:know indexer(e ~, a ~, v ~, tx `2) basic-index)
   ==
@@ -496,15 +496,15 @@
   =/  datoms=(set datom:know-sur)
     %-  sy  
     :~  
-      d(e 1, a %boop, v 1, tx 1)
-      d(e 1, a %boop, v 1, tx 2)
+      d(e 1, a [%boop %boop], v 1, tx 1)
+      d(e 1, a [%boop %boop], v 1, tx 2)
     ==
-  =+  basic-index=(build-indexs:know datoms (sy `(list @tas)`[%test ~])) 
+  =+  basic-index=(build-indexs:know datoms (sy `(list a:know-sur)`[[%test %test] ~])) 
   ;:  weld
     %+  expect-eq
       !>  ^-  (list datom:know-sur)  :~ 
-        d(e 1, a %boop, v 1, tx 1)
-        d(e 1, a %boop, v 1, tx 2)
+        d(e 1, a [%boop %boop], v 1, tx 1)
+        d(e 1, a [%boop %boop], v 1, tx 2)
       ==
       !>  (search:know indexer(e ~, a ~, v ~, tx ~) basic-index)
   ==
