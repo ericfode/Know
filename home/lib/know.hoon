@@ -376,5 +376,75 @@
     [* * * ~]  (search-eav- q indexs) 
     [* * * *]  (search-eavt q indexs)
   ==
+
+  ++  assert-schema-once
+  |=  [=db =datom]
+  ^-  (unit schema-error)
+  =/  entry=(unit schema-entry)  (~(get by schema.db) a.datom)
+  ?~  entry
+    [%no-entry =datom schema=schema.db a=a.datom]
+  ?.  ?!  mold.u.entry  v.datom
+    [%nest-fail =datom mold=mold.u.entry v=v.datom]   
+  ~
+  :: TODO assert unique
+  :: TODO assert predicate
+
+  ++  assert-schema
+  |=  [=db datoms=(list datom)]
+  ^-  (list schema-error)    :: return a list of errors paired with the invalid datom
+  (turn datoms assert-schema-once)
+  
+  ++  update-indexs    :: gas takes a list of new values so we'll do it all at once
+  |=  [=db datoms=(list datom)]
+  ^-  db
+  =/  indexed=(set datom)     (datoms-by-attrs datoms attrs.avet.indexs.db)
+  =/  avet-items=(list item)  (datoms-to-items indexed)
+  %_  db
+    idx.eavt.indexs    (gas:eavt idx.eavt.indexs.db items)
+    idx.avet.indexs    (gas:avet idx.avet.indexs.db avet-items)
+    idx.aevt.indexs    (gas:aevt idx.avet.indexs.db items)
+  ==
+
+
+
+  ++  av-to-datom
+  |=  [=[=a =v]]
+  ^-  datom
+  [e=*e =a =v t=*t]
+
+  ++  avs-to-datoms
+  |=  avs=(list [a v])
+  ^-  (list datom)
+  (turn avs av-to-datom)
+
+  ++  assign-id
+  |=  [=db datoms=(list datom) id-av=[=a =v])]
+  ^-  [db datom]
+  ;;(@ v)   :: Expecting this to assert that it nests or explode
+  =/  new-datoms=(list datom)
+    %+  turn  datoms
+    |=  [=datom]
+    ^-  datom
+    datom(e v)
+  [db(maxid +(maxid.db)) new-datoms]
+
+ ++  assign-tx-id
+  |=  [=db =transaction)]
+  ^-  [db transaction]
+  [db(maxtx +(maxtx.db)) transaction(tx (maxtx.db))] 
+
+
+  
+  
+
+  ++  transact-add
+  |=  [=db t=[=tx tx-d=[* =tx-add]]]
+  =/  [=db =t]  (assign-tx-id db t)
+  =/  tx-r=transaction-report  *transaction-report
+  
+
+  ++  transact
+  |=  [=db =transaction]
+
 --  
 

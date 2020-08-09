@@ -3,13 +3,13 @@
   ::
 
 |%
-+$  e      @             :: Entity id
++$  e      @                     :: Entity id
 +$  a      $:([n=term v=term])   :: Namespaced Attr
-+$  v      noun          :: A value
-+$  t      @d            :: Time
-+$  added  ?             :: If it's been added
-+$  tx     @             :: Transaction ID
-+$  hash   @p            :: A hash
++$  v      noun                  :: A value
++$  t      @d                    :: Time
++$  added  ?                     :: If it's been added
++$  tx     @                     :: Transaction ID
++$  hash   @p                    :: A hash
 
 +$  datom
   $:  =e
@@ -102,14 +102,51 @@
       cardinality=?(%one %many)
       doc=cord
       unique=?(%not %value %identity)
-      pred=$-(vase ?)
+      pred=(unit $-(vase ?))
       index=?
+      is-component=?
+      no-history=?
   ==
++$  error-no-entry
+  $:  =datom
+      =schema
+      =a
+  ==
++$  error-nest-fail
+  $:  =datom
+      =mold
+      =v
+  ==
++$  schema-error
+  $%  [%no-entry =error-no-entry]
+      [%nest-fail =error-nest-fail]
+  ==
+
 +$  schema (map a schema-entry)
+
+::  :db/add, :db/retract, :db.fn/call, :db.fn/retractAttribute, :db.fn/retractEntit 
++$  tx-add  (list (list [a v]))
++$  tx-data   
+  $%  [%add  tx-add]
+  ==
+
+
++$  transaction  
+  $:  =tx             :: this will be garbage until after the transaction is run
+      =tx-data       :: seems overkill to make it a unit though
+      
+  ==
+
++$  transaction-report
+  $:  before=db            :: the database before changes
+      after=db             :: the database after changes
+      datoms=(list datom)  :: The datoms that were built out of the avs passed
+  ==
+      
 +$  db
   $:  
-    indexed-attrs=(set a)
     =indexs
+    =schema
     maxtx=tx
     maxeid=e
     =hash
