@@ -1,8 +1,8 @@
 /-  *know
 
 |%  
-++  e0     ^-  e   0
-++  emax   ^-  e   0xffff.ffff.ffff.ffff
+++  e0     ^-  e   --0
+++  emax   ^-  e   --999.999.999.999.999  ::Change to max signed
 ++  tx0    ^-  tx  0
 ++  txmax  ^-  tx  0xffff.ffff.ffff.ffff
 ++  new-datom
@@ -377,27 +377,29 @@
     [* * * *]  (search-eavt q indexs)
   ==
 
-  ++  assert-schema-once
-  |=  [=db =datom]
+++  assert-schema-once
+  |=  [=db =avase]
   ^-  (unit schema-error)
-  =/  entry=(unit schema-entry)  (~(get by schema.db) a.datom)
+  =/  entry=(unit schema-entry)  (~(get by schema.db) a.avase)
   ?~  entry
-    [%no-entry =datom schema=schema.db a=a.datom]
-  ?.  ?!  mold.u.entry  v.datom
-    [%nest-fail =datom mold=mold.u.entry v=v.datom]   
+    `[%no-entry [avase schema.db a.avase]]
+  ?.  (~(nest ut type.u.entry) | -.vase.avase)
+    `[%nest-fail [avase type.u.entry (need entry)]]   
   ~
   :: TODO assert unique
   :: TODO assert predicate
 
-  ++  assert-schema
-  |=  [=db datoms=(list datom)]
+++  assert-schema
+  |=  [=db avs=(list avase)]
   ^-  (list schema-error)    :: return a list of errors paired with the invalid datom
-  (turn datoms assert-schema-once)
+  (murn avs (cury assert-schema-once db))
   
-  ++  update-indexs    :: gas takes a list of new values so we'll do it all at once
+++  update-indexs    :: gas takes a list of new values so we'll do it all at once
   |=  [=db datoms=(list datom)]
-  ^-  db
-  =/  indexed=(set datom)     (datoms-by-attrs datoms attrs.avet.indexs.db)
+  ^-  ^db
+  =/  datom-set               (sy datoms)
+  =/  indexed=(set datom)     (datoms-by-attrs datom-set attrs.avet.indexs.db)
+  =/  items                   (datoms-to-items datom-set)
   =/  avet-items=(list item)  (datoms-to-items indexed)
   %_  db
     idx.eavt.indexs    (gas:eavt idx.eavt.indexs.db items)
@@ -407,44 +409,53 @@
 
 
 
-  ++  av-to-datom
-  |=  [=[=a =v]]
+++  av-to-datom
+  |=  [=avase]
   ^-  datom
-  [e=*e =a =v t=*t]
+  (new-datom *e a.avase +.vase.avase *t)
 
-  ++  avs-to-datoms
-  |=  avs=(list [a v])
+++  avs-to-datoms
+  |=  avs=(list [a vase])
   ^-  (list datom)
   (turn avs av-to-datom)
 
-  ++  assign-id
-  |=  [=db datoms=(list datom) id-av=[=a =v])]
-  ^-  [db datom]
-  ;;(@ v)   :: Expecting this to assert that it nests or explode
-  =/  new-datoms=(list datom)
-    %+  turn  datoms
-    |=  [=datom]
+++  assign-id
+  |=  [datoms=(list datom) id-av=[=a =vase]]
+  ^-  (list datom)
+  =/  id=@s  !<(@s vase.id-av)   :: Expecting this to assert that it nests or explode
+  %+  turn  datoms
+    |=  [d=datom]
     ^-  datom
-    datom(e v)
-  [db(maxid +(maxid.db)) new-datoms]
+    d(e id)
 
- ++  assign-tx-id
-  |=  [=db =transaction)]
-  ^-  [db transaction]
-  [db(maxtx +(maxtx.db)) transaction(tx (maxtx.db))] 
-
-
-  
-  
-
-  ++  transact-add
-  |=  [=db t=[=tx tx-d=[* =tx-add]]]
-  =/  [=db =t]  (assign-tx-id db t)
-  =/  tx-r=transaction-report  *transaction-report
-  
-
-  ++  transact
+++  assign-tx-id
   |=  [=db =transaction]
+  ^-  [^db ^transaction]
+  :: [db(maxtx +(maxtx.db)) transaction(tx (maxtx.db))] 
+  !!
+
+++  ses-to-schema
+  |=  [ses=(list schema-entry)]
+  ^-  schema
+  =/  ses-items=(list (pair a schema-entry))
+    %+  turn  ses
+    |=  [se=schema-entry]
+    [ident.se se]
+  (my ses-items)
+
+
+++  transact-add
+  |=  [d=db t=transaction]
+  ^-  transaction-report
+  =/  [d=db t=transaction]  (assign-tx-id d t)
+  =/  tx-r=transaction-report  *transaction-report
+  !!
+
+
+ ++  transact
+  |=  [=db =transaction]
+  ^-  transaction-report
+  !!
 
 --  
 

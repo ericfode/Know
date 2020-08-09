@@ -3,7 +3,7 @@
   ::
 
 |%
-+$  e      @                     :: Entity id
++$  e      @s                    :: Entity id, negitive ids are temp positive are assigned
 +$  a      $:([n=term v=term])   :: Namespaced Attr
 +$  v      noun                  :: A value
 +$  t      @d                    :: Time
@@ -98,6 +98,7 @@
   ==
 +$  schema-entry
   $:  ident=a
+      =type
       =mold
       cardinality=?(%one %many)
       doc=cord
@@ -107,27 +108,31 @@
       is-component=?
       no-history=?
   ==
++$  avase  
+  $:  =a
+      =vase
+  ==
 +$  error-no-entry
-  $:  =datom
+  $:  =avase
       =schema
       =a
   ==
 +$  error-nest-fail
-  $:  =datom
-      =mold
-      =v
+  $:  =avase
+      expected=type
+      =schema-entry
   ==
 +$  schema-error
   $%  [%no-entry =error-no-entry]
       [%nest-fail =error-nest-fail]
   ==
 
-+$  schema (map a schema-entry)
++$  schema  (map a schema-entry)
 
 ::  :db/add, :db/retract, :db.fn/call, :db.fn/retractAttribute, :db.fn/retractEntit 
-+$  tx-add  (list (list [a v]))
++$  tx-add  (list (list avase))
 +$  tx-data   
-  $%  [%add  tx-add]
+  $%  [%add tx-add]
   ==
 
 
@@ -141,6 +146,7 @@
   $:  before=db            :: the database before changes
       after=db             :: the database after changes
       datoms=(list datom)  :: The datoms that were built out of the avs passed
+      tempids=(map e e)
   ==
       
 +$  db
@@ -148,7 +154,7 @@
     =indexs
     =schema
     maxtx=tx
-    maxeid=e
+    maxid=e
     =hash
   ==
 --
