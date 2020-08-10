@@ -512,8 +512,9 @@
 ++  test-assert-schema-once
   =/  se  *schema-entry:know-sur
   =/  expected  -:!>(*(pair @ @))
-  =/  se  se(ident boop/%boop, mold (pair @ @), type expected)
-  =/  sch  (ses-to-schema:know [se]~)
+  =/  se1  se(ident boop/%boop, mold schema-entry:know-sur)
+  =/  sch  (ses-to-schema:know (ly [se1 ~]))
+  ~&  sch
   =/  d   *db:know-sur
   =/  d   d(schema sch)
   =+  dt=(new-datom:know)
@@ -524,11 +525,11 @@
       !>  ~
       !>  (assert-schema-once:know d [boop/%boop !>(`(pair @ @)`[1 1])])
     %+  expect-eq
-      !>  ^-  (unit schema-error:know-sur)  `[%nest-fail [boop/%boop !>(`@p`1)] expected se]
-      !>  (assert-schema-once:know d [boop/%boop !>(`@p`1)])
+      !>  ^-  (unit schema-error:know-sur)  `[%nest-fail [boop/%boop !>(`@p`1)] expected se1]
+      !>  (assert-schema-once:know d [boop/%boop !>(`(list @)`[1 2 3 4 ~])])
     %+  expect-eq
-      !>  ^-  (unit schema-error:know-sur)  `[%nest-fail [boop/%boop !>(`@`1)] expected se]
-      !>  (assert-schema-once:know d [boop/%boop !>(`@`1)])
+      !>  ^-  (unit schema-error:know-sur)  `[%nest-fail [boop/%boop !>(`@`1)] expected se1]
+      !>  (assert-schema-once:know d [boop/%boop !>(`(unit @)`~)])
  
  
   ==

@@ -98,7 +98,6 @@
   ==
 +$  schema-entry
   $:  ident=a
-      =type
       =mold
       cardinality=?(%one %many)
       doc=cord

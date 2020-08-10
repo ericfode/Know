@@ -383,8 +383,12 @@
   =/  entry=(unit schema-entry)  (~(get by schema.db) a.avase)
   ?~  entry
     `[%no-entry [avase schema.db a.avase]]
-  ?.  (~(nest ut type.u.entry) | -.vase.avase)
-    `[%nest-fail [avase type.u.entry (need entry)]]   
+  ~&  vase.avase
+  ~&  entry
+  ~&  -:!>(!<(mold.u.entry vase.avase))
+  ~&  (mule |.(!<(mold.u.entry vase.avase)))
+  ?.  -:(mule |.(!<(mold.u.entry vase.avase)))
+    `[%nest-fail [avase -:!>(*mold.u.entry) (need entry)]]   
   ~
   :: TODO assert unique
   :: TODO assert predicate
@@ -435,11 +439,14 @@
   !!
 
 ++  ses-to-schema
-  |=  [ses=(list schema-entry)]
+  |=  ses=(list schema-entry)
   ^-  schema
+  ~&  ses
   =/  ses-items=(list (pair a schema-entry))
     %+  turn  ses
     |=  [se=schema-entry]
+    ^-  (pair a schema-entry)
+    ~&  se
     [ident.se se]
   (my ses-items)
 
