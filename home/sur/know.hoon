@@ -98,7 +98,7 @@
   ==
 +$  schema-entry
   $:  ident=a
-      =mold
+      =mark
       cardinality=?(%one %many)
       doc=cord
       unique=?(%not %value %identity)
@@ -118,7 +118,6 @@
   ==
 +$  error-nest-fail
   $:  =avase
-      expected=type
       =schema-entry
   ==
 +$  schema-error

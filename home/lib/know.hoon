@@ -377,26 +377,29 @@
     [* * * *]  (search-eavt q indexs)
   ==
 
+::  bek /(scot %p our.bowl)/[q.byk.bowl]/(scot %da now.bowl)  
 ++  assert-schema-once
-  |=  [=db =avase]
+  |=  [=db =avase bek=[p=@ta q=@ta d=@ta]]
   ^-  (unit schema-error)
   =/  entry=(unit schema-entry)  (~(get by schema.db) a.avase)
   ?~  entry
     `[%no-entry [avase schema.db a.avase]]
-  ~&  vase.avase
-  ~&  entry
-  ~&  -:!>(!<(mold.u.entry vase.avase))
-  ~&  (mule |.(!<(mold.u.entry vase.avase)))
-  ?.  -:(mule |.(!<(mold.u.entry vase.avase)))
-    `[%nest-fail [avase -:!>(*mold.u.entry) (need entry)]]   
+  ~&  /[p.bek]/[q.bek]/[d.bek]/[mark.u.entry]
+  =/  =dais:clay
+    .^  =dais:clay
+       %cb
+       /[p.bek]/[q.bek]/[d.bek]/[mark.u.entry]
+  ==
+  ?.  =(%& -:(mule |.((vale:dais +:avase))))
+    `[%nest-fail [avase (need entry)]]   
   ~
   :: TODO assert unique
   :: TODO assert predicate
 
 ++  assert-schema
-  |=  [=db avs=(list avase)]
+  |=  [=db avs=(list avase) bek=[p=@ta q=@ta d=@ta]]
   ^-  (list schema-error)    :: return a list of errors paired with the invalid datom
-  (murn avs (cury assert-schema-once db))
+  (murn avs |=([=avase] (assert-schema-once db avase bek)))
   
 ++  update-indexs    :: gas takes a list of new values so we'll do it all at once
   |=  [=db datoms=(list datom)]
@@ -439,13 +442,12 @@
   !!
 
 ++  ses-to-schema
-  |=  ses=(list schema-entry)
+  |=  [ses=(list schema-entry)]
   ^-  schema
   ~&  ses
   =/  ses-items=(list (pair a schema-entry))
     %+  turn  ses
     |=  [se=schema-entry]
-    ^-  (pair a schema-entry)
     ~&  se
     [ident.se se]
   (my ses-items)
