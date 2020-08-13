@@ -511,27 +511,19 @@
 
 ++  test-assert-schema-once
   =/  se  *schema-entry:know-sur
-  =/  se1  se(ident boop/%boop, mark %urbit, doc 'test')
+  =/  se1  se(ident boop/%boop, mark ~, doc 'test')
   =/  sch  (ses-to-schema:know ~[se1])
   =/  d   *db:know-sur
   =/  d   d(schema sch)
   =+  dt=(new-datom:know)
   =/  dt  dt(e -1, a [%boop %boop], v 1, tx 1)
-  ~&  (get-bowl)
   =/  byks=[p=@ta q=@ta d=@ta ~]  [~.~zod ~.home ~.~2020.8.12..19.44.34..4188 ~]
   =/  byk=[p=@ta q=@ta d=@ta]  [p.byks q.byks d.byks]
   ;:  weld
     %+  expect-eq
       !>  ~
       !>  (assert-schema-once:know d [boop/%boop !>(`@p`1.232)] byk)
-    %+  expect-eq
-      !>  ^-  (unit schema-error:know-sur)  `[%nest-fail [boop/%boop !>(`@p`1)] se1]
-      !>  (assert-schema-once:know d [boop/%boop !>('test')] byk)
-    %+  expect-eq
-      !>  ^-  (unit schema-error:know-sur)  `[%nest-fail [boop/%boop !>(`@`1)] se1]
-      !>  (assert-schema-once:know d [boop/%boop !>(`(unit @)`~)] byk)
- 
- 
+     
   ==
 
 

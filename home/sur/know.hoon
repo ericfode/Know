@@ -98,7 +98,7 @@
   ==
 +$  schema-entry
   $:  ident=a
-      =mark
+      mark=(unit mark)
       cardinality=?(%one %many)
       doc=cord
       unique=?(%not %value %identity)

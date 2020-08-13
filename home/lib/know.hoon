@@ -384,11 +384,12 @@
   =/  entry=(unit schema-entry)  (~(get by schema.db) a.avase)
   ?~  entry
     `[%no-entry [avase schema.db a.avase]]
-  ~&  /[p.bek]/[q.bek]/[d.bek]/[mark.u.entry]
+  ?~  mark.u.entry
+    ~
   =/  =dais:clay
     .^  =dais:clay
        %cb
-       /[p.bek]/[q.bek]/[d.bek]/[mark.u.entry]
+       /[p.bek]/[q.bek]/[d.bek]/[u.mark.u.entry]
   ==
   ?.  =(%& -:(mule |.((vale:dais +:avase))))
     `[%nest-fail [avase (need entry)]]   
@@ -401,7 +402,7 @@
   ^-  (list schema-error)    :: return a list of errors paired with the invalid datom
   (murn avs |=([=avase] (assert-schema-once db avase bek)))
   
-++  update-indexs    :: gas takes a list of new values so we'll do it all at once
+++  update-indexs-add    :: gas takes a list of new values so we'll do it all at once
   |=  [=db datoms=(list datom)]
   ^-  ^db
   =/  datom-set               (sy datoms)
@@ -417,9 +418,9 @@
 
 
 ++  av-to-datom
-  |=  [=avase]
+  |=  [=avase tempid=e]
   ^-  datom
-  (new-datom *e a.avase +.vase.avase *t)
+  (new-datom tempid a.avase +.vase.avase *t)
 
 ++  avs-to-datoms
   |=  avs=(list [a vase])
@@ -427,13 +428,9 @@
   (turn avs av-to-datom)
 
 ++  assign-id
-  |=  [datoms=(list datom) id-av=[=a =vase]]
+  |=  [datoms=(list datom) id=e]
   ^-  (list datom)
-  =/  id=@s  !<(@s vase.id-av)   :: Expecting this to assert that it nests or explode
-  %+  turn  datoms
-    |=  [d=datom]
-    ^-  datom
-    d(e id)
+  %+  turn  datoms  |=([d=datom] d(e id))
 
 ++  assign-tx-id
   |=  [=db =transaction]
@@ -448,7 +445,6 @@
   =/  ses-items=(list (pair a schema-entry))
     %+  turn  ses
     |=  [se=schema-entry]
-    ~&  se
     [ident.se se]
   (my ses-items)
 
