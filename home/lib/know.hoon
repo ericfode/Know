@@ -417,22 +417,14 @@
 
 ++  assign-txids
   |=  [datoms=tx-add =tx]
-  ^-  (list (list datom))
+  ^-  tx-add
   %+  turn  datoms
-  |=  [inner-datoms=(list datom)]
-  ^-  (list (list datom))
-  %+  turn  inner-datoms
-  |=([d=datom] ^-(datom d(tx tx)))
+    |=  [inner-datoms=(list datom)]
+    ^-  (list datom)
+    %+  turn  inner-datoms
+      |=([d=datom] ^-(datom d(tx tx)))
 
-++  maybe-assign-ids
-  |=  [datoms=(list datom) id=e]
-  ^-  (list datom)
-  %+  turn  datoms  
-    |=  [d=datom] 
-    ^-  datom 
-    ?:  =(0 e.d)
-      d(e id)
-    d
+
 
 ++  assign-tx-id
   |=  [=db =transaction]
@@ -464,20 +456,31 @@
   [db.s datoms-with-ids tempids.s]
       
 
+++  maybe-assign-ids
+  |=  [datoms=(list datom) id=e]
+  ^-  (list datom)
+  %+  turn  datoms  
+    |=  [d=datom] 
+    ^-  datom 
+    ?:  =(0 e.d)
+      d(e id)
+    d
+
 ++  add-temp-ids
   |=  [=tx-add eny=@uv]
   ^-  ^tx-add
-  %+  tx-add
+  %+  turn  tx-add
     |=  [datoms=(list datom)]
-    =/  =tx (new-temp-id eny)
+    =/  =tx  (new-temp-id eny)
     (maybe-assign-ids datoms tx)
 
 ++  update-tx-add-ids
   |=  [=db =tx-add]
-  ^-  [db=^db =tempids tx-add=^tx-add ]
-  =/  [tx-with-ids=tx-add s=[=^db =^tempids]]
-    %^  spin  tx-add  [=^db  tempids=*tempids]
-    |=  [ds=(list datom) s=[=^db =^tempids]]
+  ^-  [=^db =tempids =^tx-add]
+  =/  [tx-with-ids=^tx-add s=[=^db =tempids]]
+    %^  spin  tx-add  [=^db tempids=*tempids]
+    |=  [ds=(list datom) s=[=^db =tempids]]
+    ^-  [(list datom) _s]
     =/  [db=^db datoms=(list datom) =tempids]
       (collect-and-replace-temp-ids db ds)
     [datoms s=[db tempids]]
@@ -498,30 +501,27 @@
   |=  [d=db t=transaction eny=@uv bek=[p=@ta q=@ta d=@ta]]
   ^-  (each [db transaction-report] schema-errors)
   =/  [d=db t=transaction]        (assign-tx-id d t)
-  =/  =tx-add                     (assign-txids +:t tx.t)
-  =/  =tx-add                     (add-temp-ids tx-add eny)
-  =/  [d=db =tempids with-temp-ids=tx-add]  
-                                  (update-tx-add-ids db tx-add)
-  =/  datoms-before=(list datom)  (zing +:t)
-  =/  datoms-after=(list datom)   (zing with-temp-ids)
+  =/  =tx-add                     (assign-txids +:tx-data.t tx.t)
+  =.  tx-add                      (add-temp-ids tx-add eny)
+  =/  [d=db =tempids =^tx-add]    (update-tx-add-ids d tx-add)
+  =/  datoms-before=(list datom)  (zing +:tx-data.t)
+  =/  datoms-after=(list datom)   (zing tx-add)
   =/  schema-errors               (assert-schema d datoms-after bek)
-  ?.  =($~ schema-errors)
-    :-  |  schema-errors
+  ?.  =($~ schema-errors)  |+schema-errors
   =/  tx-r=transaction-report  *transaction-report
-  :-  &
-    :-  (update-indexs-add d datoms-after)
-      %_  tx-r
-        before   datoms-before
-        after    datoms-after
-        tempids  tempids  
-      ==
+  :+  %.y  (update-indexs-add d datoms-after)
+    %_  tx-r
+      before   datoms-before
+      after    datoms-after
+      tempids  tempids  
+    ==
 
 
  ++  transact
   |=  [=db =transaction eny=@uv bek=[p=@ta q=@ta d=@ta]]
-  ^-  (each [db transaction-report] schema-errors)
-  ?-  transaction
-    [%add *]  (transact-add db transaction)
+  ^-  (each [^db transaction-report] schema-errors)
+  ?-  tx-data.transaction
+    [%add *]  (transact-add db transaction eny bek)
   ==
 
 --  

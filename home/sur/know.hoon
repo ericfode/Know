@@ -121,7 +121,7 @@
   $%  [%no-entry =error-no-entry]
       [%nest-fail =error-nest-fail]
   ==
-
++$  schema-errors  (list schema-error)
 +$  schema  (map a schema-entry)
 +$  tempids  (map e e)
 ::  :db/add, :db/retract, :db.fn/call, :db.fn/retractAttribute, :db.fn/retractEntit 
@@ -132,9 +132,9 @@
 
 
 +$  transaction  
-  $:  =tx             :: this will be garbage until after the transaction is run
+  $:               :: this will be garbage until after the transaction is run
       =tx-data       :: seems overkill to make it a unit though
-      
+      =tx
   ==
 
 +$  transaction-report
