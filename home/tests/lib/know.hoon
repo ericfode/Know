@@ -522,11 +522,53 @@
   ;:  weld
     %+  expect-eq
       !>  ~
-      !>  (assert-schema-once:know d [boop/%boop !>(`@p`1.232)] byk)
+      !>  (assert-schema-once:know d dt byk)
      
   ==
 
-
+++  test-collect-and-replace-tempids
+  =/  se  *schema-entry:know-sur
+  =/  se1  se(ident boop/%boop, mark ~, doc 'test')
+  =/  sch  (ses-to-schema:know ~[se1])
+  =/  db   *db:know-sur
+  =/  db   db(schema sch)
+  =+  d=(new-datom:know)
+  =/  datoms=(list datom:know-sur)
+  :~
+    d(e -1, a [%boop %boop], v 2, tx 0)
+    d(e -2, a [%boop %boop], v 2, tx 0)
+    d(e -2, a [%boop %boop], v 3, tx 0)
+    d(e -3, a [%boop %boop], v 1, tx 0)
+    d(e -4, a [%boop %boop], v 1, tx 0)
+    d(e -1, a [%boop %boop], v 1, tx 0)
+    d(e -1, a [%boop %boop], v 1, tx 0)
+    d(e -1, a [%boop %boop], v 1, tx 0)
+  ==
+  =/  expected-datoms=(list datom:know-sur)
+  :~
+    d(e --1, a [%boop %boop], v 2, tx 0)
+    d(e --2, a [%boop %boop], v 2, tx 0)
+    d(e --2, a [%boop %boop], v 3, tx 0)
+    d(e --3, a [%boop %boop], v 1, tx 0)
+    d(e --4, a [%boop %boop], v 1, tx 0)
+    d(e --1, a [%boop %boop], v 1, tx 0)
+    d(e --1, a [%boop %boop], v 1, tx 0)
+    d(e --1, a [%boop %boop], v 1, tx 0)
+  ==
+  =/  result=[res-db=db:know-sur res=(list datom:know-sur) =tempids:know-sur]   
+    (collect-and-replace-temp-ids:know db datoms)
+    
+  ;:  weld
+    %+  expect-eq
+      !>  expected-datoms
+      !>  res.result
+    %+  expect-eq
+      !>  ^-  tempids:know-sur  (my ~[[-1 --1] [-2 --2] [-3 --3] [-4 --4]])
+      !>  tempids.result
+    %+  expect-eq
+      !>  --4
+      !>  maxid.res-db.result
+  ==
 
 
 --

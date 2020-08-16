@@ -107,17 +107,14 @@
       is-component=?
       no-history=?
   ==
-+$  avase  
-  $:  =a
-      =vase
-  ==
+
 +$  error-no-entry
-  $:  =avase
+  $:  =datom
       =schema
       =a
   ==
 +$  error-nest-fail
-  $:  =avase
+  $:  =datom
       =schema-entry
   ==
 +$  schema-error
@@ -126,9 +123,9 @@
   ==
 
 +$  schema  (map a schema-entry)
-
++$  tempids  (map e e)
 ::  :db/add, :db/retract, :db.fn/call, :db.fn/retractAttribute, :db.fn/retractEntit 
-+$  tx-add  (list (list avase))
++$  tx-add  (list (list datom))
 +$  tx-data   
   $%  [%add tx-add]
   ==
@@ -141,10 +138,9 @@
   ==
 
 +$  transaction-report
-  $:  before=db            :: the database before changes
-      after=db             :: the database after changes
-      datoms=(list datom)  :: The datoms that were built out of the avs passed
-      tempids=(map e e)
+  $:  before=(list datom)           :: the datoms before changes
+      after=(list datom)            :: the datoms after changes
+      =tempids
   ==
       
 +$  db

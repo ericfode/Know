@@ -379,11 +379,11 @@
 
 ::  bek /(scot %p our.bowl)/[q.byk.bowl]/(scot %da now.bowl)  
 ++  assert-schema-once
-  |=  [=db =avase bek=[p=@ta q=@ta d=@ta]]
+  |=  [=db =datom bek=[p=@ta q=@ta d=@ta]]
   ^-  (unit schema-error)
-  =/  entry=(unit schema-entry)  (~(get by schema.db) a.avase)
+  =/  entry=(unit schema-entry)  (~(get by schema.db) a.datom)
   ?~  entry
-    `[%no-entry [avase schema.db a.avase]]
+    `[%no-entry [datom schema.db a.datom]]
   ?~  mark.u.entry
     ~
   =/  =dais:clay
@@ -391,16 +391,16 @@
        %cb
        /[p.bek]/[q.bek]/[d.bek]/[u.mark.u.entry]
   ==
-  ?.  =(%& -:(mule |.((vale:dais +:avase))))
-    `[%nest-fail [avase (need entry)]]   
+  ?.  =(%& -:(mule |.((vale:dais v.datom))))
+    `[%nest-fail [datom (need entry)]]   
   ~
   :: TODO assert unique
   :: TODO assert predicate
 
 ++  assert-schema
-  |=  [=db avs=(list avase) bek=[p=@ta q=@ta d=@ta]]
+  |=  [=db avs=(list datom) bek=[p=@ta q=@ta d=@ta]]
   ^-  (list schema-error)    :: return a list of errors paired with the invalid datom
-  (murn avs |=([=avase] (assert-schema-once db avase bek)))
+  (murn avs |=([=datom] (assert-schema-once db datom bek)))
   
 ++  update-indexs-add    :: gas takes a list of new values so we'll do it all at once
   |=  [=db datoms=(list datom)]
@@ -415,33 +415,78 @@
     idx.aevt.indexs    (gas:aevt idx.avet.indexs.db items)
   ==
 
+++  assign-txids
+  |=  [datoms=tx-add =tx]
+  ^-  (list (list datom))
+  %+  turn  datoms
+  |=  [inner-datoms=(list datom)]
+  ^-  (list (list datom))
+  %+  turn  inner-datoms
+  |=([d=datom] ^-(datom d(tx tx)))
 
-
-++  av-to-datom
-  |=  [=avase tempid=e]
-  ^-  datom
-  (new-datom tempid a.avase +.vase.avase *t)
-
-++  avs-to-datoms
-  |=  avs=(list [a vase])
-  ^-  (list datom)
-  (turn avs av-to-datom)
-
-++  assign-id
+++  maybe-assign-ids
   |=  [datoms=(list datom) id=e]
   ^-  (list datom)
-  %+  turn  datoms  |=([d=datom] d(e id))
+  %+  turn  datoms  
+    |=  [d=datom] 
+    ^-  datom 
+    ?:  =(0 e.d)
+      d(e id)
+    d
 
 ++  assign-tx-id
   |=  [=db =transaction]
   ^-  [^db ^transaction]
-  :: [db(maxtx +(maxtx.db)) transaction(tx (maxtx.db))] 
-  !!
+  [db(maxtx +(maxtx.db)) transaction(tx +(maxtx.db))] 
+  
+
+++  new-temp-id
+  |=  [eny=@uv]
+  (new:si | (~(rad og eny) emax))
+
+++  collect-and-replace-temp-ids
+  |=  [=db datoms=(list datom)]
+  ^-  [db=^db datoms=(list datom) =tempids]
+  =/  tempids  *(map a a)
+  =/  [datoms-with-ids=(list datom) s=[db=^db =^tempids]]
+    %^  spin  datoms  [=^db =^tempids]
+    |=  [d=datom s=[db=^db =^tempids]]
+    ?:  (syn:si e.d)                                       :: is it a tempid
+      [d s]                                                :: if it's not just return
+    =/  assigned-id  (~(get by tempids.s) e.d)             :: if it is try to look it up
+    ?.  ?=($~ assigned-id)                                 :: has it already been replaced
+      [d(e u.assigned-id) s]                               :: just update the datom
+    =/  new-id  (sum:si maxid.db.s --1)                    :: otherwise get a new one
+    =/  new-tempids  (~(put by tempids.s) e.d new-id)
+    =/  new-db  db.s(maxid new-id)
+    =/  new-datom  d(e new-id)
+    [new-datom s=[db=new-db tempids=new-tempids]]
+  [db.s datoms-with-ids tempids.s]
+      
+
+++  add-temp-ids
+  |=  [=tx-add eny=@uv]
+  ^-  ^tx-add
+  %+  tx-add
+    |=  [datoms=(list datom)]
+    =/  =tx (new-temp-id eny)
+    (maybe-assign-ids datoms tx)
+
+++  update-tx-add-ids
+  |=  [=db =tx-add]
+  ^-  [db=^db =tempids tx-add=^tx-add ]
+  =/  [tx-with-ids=tx-add s=[=^db =^tempids]]
+    %^  spin  tx-add  [=^db  tempids=*tempids]
+    |=  [ds=(list datom) s=[=^db =^tempids]]
+    =/  [db=^db datoms=(list datom) =tempids]
+      (collect-and-replace-temp-ids db ds)
+    [datoms s=[db tempids]]
+  [db.s tempids.s tx-with-ids]
+
 
 ++  ses-to-schema
   |=  [ses=(list schema-entry)]
   ^-  schema
-  ~&  ses
   =/  ses-items=(list (pair a schema-entry))
     %+  turn  ses
     |=  [se=schema-entry]
@@ -450,17 +495,34 @@
 
 
 ++  transact-add
-  |=  [d=db t=transaction]
-  ^-  transaction-report
-  =/  [d=db t=transaction]  (assign-tx-id d t)
+  |=  [d=db t=transaction eny=@uv bek=[p=@ta q=@ta d=@ta]]
+  ^-  (each [db transaction-report] schema-errors)
+  =/  [d=db t=transaction]        (assign-tx-id d t)
+  =/  =tx-add                     (assign-txids +:t tx.t)
+  =/  =tx-add                     (add-temp-ids tx-add eny)
+  =/  [d=db =tempids with-temp-ids=tx-add]  
+                                  (update-tx-add-ids db tx-add)
+  =/  datoms-before=(list datom)  (zing +:t)
+  =/  datoms-after=(list datom)   (zing with-temp-ids)
+  =/  schema-errors               (assert-schema d datoms-after bek)
+  ?.  =($~ schema-errors)
+    :-  |  schema-errors
   =/  tx-r=transaction-report  *transaction-report
-  !!
+  :-  &
+    :-  (update-indexs-add d datoms-after)
+      %_  tx-r
+        before   datoms-before
+        after    datoms-after
+        tempids  tempids  
+      ==
 
 
  ++  transact
-  |=  [=db =transaction]
-  ^-  transaction-report
-  !!
+  |=  [=db =transaction eny=@uv bek=[p=@ta q=@ta d=@ta]]
+  ^-  (each [db transaction-report] schema-errors)
+  ?-  transaction
+    [%add *]  (transact-add db transaction)
+  ==
 
 --  
 
