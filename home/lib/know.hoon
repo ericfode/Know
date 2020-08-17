@@ -432,17 +432,12 @@
   [db(maxtx +(maxtx.db)) transaction(tx +(maxtx.db))] 
   
 
-++  new-temp-id
-  |=  [eny=@uv]
-  (new:si | (~(rad og eny) emax))
-
 ++  collect-and-replace-temp-ids
-  |=  [=db datoms=(list datom)]
-  ^-  [db=^db datoms=(list datom) =tempids]
-  =/  tempids  *(map a a)
-  =/  [datoms-with-ids=(list datom) s=[db=^db =^tempids]]
-    %^  spin  datoms  [=^db =^tempids]
-    |=  [d=datom s=[db=^db =^tempids]]
+  |=  [=db datoms=(list datom) =tempids]
+  ^-  [db=^db datoms=(list datom) ^tempids]
+  =/  [datoms-with-ids=(list datom) s=[db=^db tempids=^tempids]]
+    %^  spin  datoms  [db=db tempids=tempids]
+    |=  [d=datom s=[db=^db tempids=^tempids]]
     ?:  (syn:si e.d)                                       :: is it a tempid
       [d s]                                                :: if it's not just return
     =/  assigned-id  (~(get by tempids.s) e.d)             :: if it is try to look it up
@@ -462,29 +457,34 @@
   %+  turn  datoms  
     |=  [d=datom] 
     ^-  datom 
-    ?:  =(0 e.d)
+    ?:  =(--0 e.d)
       d(e id)
     d
 
 ++  add-temp-ids
   |=  [=tx-add eny=@uv]
   ^-  ^tx-add
-  %+  turn  tx-add
-    |=  [datoms=(list datom)]
-    =/  =tx  (new-temp-id eny)
-    (maybe-assign-ids datoms tx)
+  =/  [updated-tx=^tx-add *]
+  =/  rng  ~(. og eny)
+  %^  spin  tx-add  rng
+    |=  [datoms=(list datom) rng=_rng]
+    =^  new-num  rng  (rads:rng emax)
+    =/  =e  (new:si | new-num)
+    ~&  e
+    [(maybe-assign-ids datoms e) rng]
+  updated-tx
 
 ++  update-tx-add-ids
-  |=  [=db =tx-add]
-  ^-  [=^db =tempids =^tx-add]
-  =/  [tx-with-ids=^tx-add s=[=^db =tempids]]
-    %^  spin  tx-add  [=^db tempids=*tempids]
-    |=  [ds=(list datom) s=[=^db =tempids]]
-    ^-  [(list datom) _s]
-    =/  [db=^db datoms=(list datom) =tempids]
-      (collect-and-replace-temp-ids db ds)
-    [datoms s=[db tempids]]
-  [db.s tempids.s tx-with-ids]
+  |=  [=db =tx-add]                           :: Takes the current state of the db and a tx
+  ^-  [=^db =tempids =^tx-add]                :: Returns a new db, with the maxtx updated
+  =/  [tx-with-ids=^tx-add s=[=^db =tempids]]  :: as well as the updated tx
+    %^  spin  tx-add  [db *tempids]           :: To construct this we spin over the tx
+    |=  [ds=(list datom) s=[=^db =tempids]]   :: Taking the db and the current list of tempids
+    ^-  [(list datom) _s]                     :: Each time return the current list of datoms and new state
+    =/  [db=^db datoms=(list datom) =tempids] :: we construct that by collection any tempids
+      (collect-and-replace-temp-ids db.s ds tempids.s)    :: that are already in the datoms and replacing them with realids
+    [datoms s=[db tempids]]                   :: then returning those datoms and updated db
+  [db.s tempids.s tx-with-ids]                :: then return the whole thing
 
 
 ++  ses-to-schema
@@ -507,7 +507,7 @@
   =/  datoms-before=(list datom)  (zing +:tx-data.t)
   =/  datoms-after=(list datom)   (zing tx-add)
   =/  schema-errors               (assert-schema d datoms-after bek)
-  ?.  =($~ schema-errors)  |+schema-errors
+  ?:  =($~ schema-errors)  |+schema-errors
   =/  tx-r=transaction-report  *transaction-report
   :+  %.y  (update-indexs-add d datoms-after)
     %_  tx-r

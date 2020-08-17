@@ -556,7 +556,7 @@
     d(e --1, a [%boop %boop], v 1, tx 0)
   ==
   =/  result=[res-db=db:know-sur res=(list datom:know-sur) =tempids:know-sur]   
-    (collect-and-replace-temp-ids:know db datoms)
+    (collect-and-replace-temp-ids:know db datoms *tempids:know-sur)
     
   ;:  weld
     %+  expect-eq
@@ -568,6 +568,58 @@
     %+  expect-eq
       !>  --4
       !>  maxid.res-db.result
+  ==
+
+
+++  test-transact-add
+  =/  se  *schema-entry:know-sur
+  =/  se1  se(ident boop/%boop, mark ~, doc 'test')
+  =/  se2  se(ident boop/%bop, mark ~, doc 'test')
+  =/  se3  se(ident boop/%top, mark ~, doc 'test')
+  =/  sch  (ses-to-schema:know ~[se1 se2 se3])
+  =/  db   *db:know-sur
+  =/  db   db(schema sch)
+  =+  d=(new-datom:know)
+  =/  datoms=(list (list datom:know-sur))
+  :~ 
+    :~
+      d(a boop/%boop, v 1)
+      d(a boop/%bop, v 1)
+    ==
+    :~
+      d(a boop/%bop, v 2)
+      d(a boop/%boop, v 2)
+    ==
+  == 
+  =/  byks=[p=@ta q=@ta d=@ta ~]  [~.~zod ~.home ~.~2020.8.12..19.44.34..4188 ~]
+  =/  byk=[p=@ta q=@ta d=@ta]  [p.byks q.byks d.byks]
+  =/  transaction=transaction:know-sur  
+    [tx-data=[%add datoms] tx=0]
+  =/  expected-datoms=(list datom:know-sur)
+  :~
+    d(e --1, a [%boop %boop], v 1, tx 1)
+    d(e --1, a [%boop %bop], v 1, tx 1)
+    d(e --2, a [%boop %bop], v 2, tx 1)
+    d(e --2, a [%boop %boop], v 2, tx 1)
+  ==
+  =/  result=(each [db:know-sur transaction-report:know-sur] schema-errors:know-sur)
+    (transact:know db transaction `@uv`0 byk)
+  ?>  ?=(%& -.result)
+  =/  [=db:know-sur txr=transaction-report:know-sur]  p.result
+  ;:  weld
+    %+  expect-eq
+      !>  %.y 
+      !>  -:result
+    %+  expect-eq
+      !>  (zing datoms)
+      !>  before.txr
+    %+  expect-eq
+      !>  expected-datoms
+      !>  after.txr
+    %+  expect-eq
+     !>  (my [-594.882.946.332.110 --2] [-1.586.380.539.752.686 --1] ~)
+     !>  tempids.txr
+
   ==
 
 
