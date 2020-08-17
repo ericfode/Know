@@ -470,7 +470,6 @@
     |=  [datoms=(list datom) rng=_rng]
     =^  new-num  rng  (rads:rng emax)
     =/  =e  (new:si | new-num)
-    ~&  e
     [(maybe-assign-ids datoms e) rng]
   updated-tx
 
@@ -524,5 +523,185 @@
     [%add *]  (transact-add db transaction eny bek)
   ==
 
+:::  EVEYTHING FROM HERE DOWN IS DRAFT
+:::  I don't really know what i'm doing so i'm trying explaing
+:::  various solutions.
+
+
+:: q
+::  {find ~[%star-date @da],
+::   where [[%bin /pastebin-entry/author "alice"]
+::          [%bin /starred/date %star-date] ~]}
+::   we want to build something that takes that ^
+::   and turns it into a function that can be applied
+::   to a dataset that returns the values needed.
+::   that function should be partially applicable
+::   so that parts of it can be execution in multiple
+::   places.
+
+::   We are going to start with
+::   find this is a list of pairs of %symbol and types.
+::   It's possible that we might just want to do symbols,
+::   or use the marks in the schema associated with the key
+::   ... We'll start with that.
+::   It should therefor have a type like
+++   finder  $-(find-clause find-combinator)
+
+
+::   where
+::   This is a list of combinators that will get pipelined with
+::   the ;: com    
+::   the output of all of this needs to end up as a noun
+::   that noun will be pairs of [key value]
+::   keys that have multiple values will be turned into a list
+|=  [a=filter b=$-(clause filter)]  `filter`?~(a ~ (b a))
+;:  query
+  (find ~[%star-date @da])             :: check all ofd the capture maps for %star-date
+                                       :: and and the results to the output map 
+                                       :: adds a symbol to the output map 
+  (with ~[%bin])                       :: adds a symbol to the intermidates map
+  ;;  and                              :: takes datoms sets and unions thems                     
+    (where (simp [%bin /pasebin-entry/author "alice"]))   :: checks intermidates map for
+    :: %bin, if it's present the (query [`bin-value `/pastebin-entry/author `"alice" ~])
+    :: accumulate the result of applying doing that with each %bin.
+    :: this is the new working set. the top level function should turn this into a db
+    :: and pass it to the next funtion
+
+    :: if %bin is not present then do (query [~ `/pastebin-entry/author `"alice" ~])
+    :: save all of the resulting e values in the e-caputres (map @tas e)
+    :: don't save any a there was a litteral a, rather then an @tas
+    :: don't save any v  there was a litteral v, rather then a @tas
+    :: don't save any t  there was a nil (or rather it was elided and we normalized to have a nil)
+
+    (where (simp [%bin /pastebin-entry/date %star-date]))  
+    ::  check the working e-capatures for %bin
+    ::  if they are present use them in a query in a moment
+    ::  use the literal a no @tas was mentioned
+    ::  
+    ::
+    ::  really the result of this is a set of query tuples (or gates that return query tuples given a db) 
+    ::  and captures what to caputure from each from each of the
+    ::  but these query tuples are ordered. or rather they results are composed.
+
+    ::  we get something like this
+    +$  state
+      $:  query-actions
+      working-set
+      captures
+      ==
+    
+    ++  caputure-e
+    |=  [query] 
+    ^-  context
+    ?:  ?=(@tas e.query)
+      |=  [context]
+      ^-  context 
+      =/  e-cap  (unit (list e))  (~(get by e.captures) e.query)
+      ?~  e-cap
+        (query working-set [~ a.query ~ ~])
+
+    ++  e-is-lit
+    ++  a-is-lit
+    ++  v-is-lit
+    ++  t-is-lit
+
+    ++  context-has-e
+    ++  context-has-a
+    ++  context-has-v
+    ++  context-has-t
+
++$  to-capture
+  $:  e=@tas
+      a=@tas
+      v=@tas
+      t=@tas
+  ==
+
++$  found  (map @tas *)
+  
+
+
++$  pending-queries  (list indexer)
+
+ +$  context
+      $:  pending-queries
+      working-db
+      to-capture
+      found
+      ==
+++  reduce-db
+  |=  [=context]
+  ^-  (list datom)
+  =/  res=(list (list datom))
+    %+  roll  pending-queries.context
+    |=  [=indexer]
+    (query working-db.context indexer)
+  (zing res)
+
+
+++  where
+  |=  [query-spec]
+  |=  [context]
+  ^-  context
+  =^  context  (maybe-update-with-es query-spec context)
+  =^  context  (maybe-update-with-as query-spec context)
+  =^  context  (maybe-update-with-vs query-spec context)
+  =^  context  (maybe-update-with-ts query-spec context)
+  =/  results  (reduce-db context)
+  =/  context  (resolve-captures context results)
+  [results context]
+
+    
+
+  
+    ++  e-queries
+    |=  [context]
+
+
+
+    (where (simp [%bin /pasebin-entry/author "alice"]))
+
+    (where (simp [%bin /pastebin-entry/date %star-date]))  
+    :: needs to turn into a query, one for each %bin found in the last query
+    [~ a.query ~ ~]
+    :: Then the result of that query needs to have the as and the vs captured
+
+    :: have a combining function that checks to see if there has to be more querying
+    :: done and does it if it has to.
+
+    ++  maybe-reduce
+    |=  [query (list query-tuples) state db]
+    :: First it will check to see if there is anything left in the query
+    ?~  query
+      :: Then we simply run all our queries 
+      =/  res=(set datom)  (reduce query-tuples db)
+      :: 
+      ::  execute all of the captures
+      ::  in the state
+      =/  state-with-caputures  (apply-caputures state res)
+      ::  then return 
+
+    ::  then it will check to see if there are any more unsatisfied
+  
+
+    ::  The goal is to reduce the query to identity eventually
+
+
+
+    (query query-tuypesl)
+    (this-func query-tuples state)
+    ::  query tuples
+
+++  result-function
+  
+$-(db result)
++$  result  
+  $:  datoms=(list datom)
+      bound-symbols=(map @tas *)
+      
+::   where [[%bin /pastebin-entry/author "alice"]
+::          [%bin /starred/date %star-date] ~]}
+)
 --  
 
+::  |=([a=tape b=$-(char tape)] `tape`?~(a ~ (weld (b i.a) t.a)))
